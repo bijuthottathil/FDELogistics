@@ -1,0 +1,31 @@
+name: Enterprise Manual Deploy
+
+# Requires a self-hosted runner registered on the same machine that runs
+# minikube (Settings > Actions > Runners > New self-hosted runner). Start
+# minikube and the runner (./run.sh, or install it as a service) before
+# triggering this workflow — a queued job just waits if either is down.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Point kubectl at minikube
+        run: kubectl config use-context minikube
+
+      - name: Build image into minikube's Docker daemon
+        run: |
+          eval $(minikube docker-env)
+          docker build -t fde-cold-chain:local .
+
+      - name: Apply manifests
+        run: kubectl apply -f k8s/app/
+
+      - name: Roll out the new image
+        run: |
+          kubectl rollout restart deployment/fde-app
+          kubectl rollout status deployment/fde-app --timeout=120s

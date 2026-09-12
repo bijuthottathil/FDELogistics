@@ -1,0 +1,14 @@
+.env
+__pycache__/
+venv/
+.venv/
+k8s/app-secrets.env
+.DS_Store
+**/.DS_Store
+.claude/
+.files/
+Misc/Materials/
+docs/
+ARTICLE.md
+reading.md
+notes.pdf

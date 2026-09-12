@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fde-app
+  labels:
+    app: fde-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fde-app
+  template:
+    metadata:
+      labels:
+        app: fde-app
+    spec:
+      containers:
+        - name: fde-app
+          image: fde-cold-chain:local
+          imagePullPolicy: IfNotPresent   # image is built straight into minikube's docker daemon
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "250m"
+            limits:
+              memory: "3Gi"

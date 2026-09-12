@@ -1,0 +1,14 @@
+.git
+.github
+venv
+.venv
+__pycache__
+**/__pycache__
+*.pyc
+.env
+Misc
+notes.pdf
+data/cache
+k8s
+README.md
+docs

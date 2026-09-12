@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-init
+          image: fde-cold-chain:local
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -e
+              echo "Waiting for SQL Server to accept logins..."
+              until sqlcmd -S "$SQL_SERVER_HOST,$SQL_SERVER_PORT" -U "$SQL_ADMIN_USER" -P "$SQL_ADMIN_PASSWORD" -C -Q "SELECT 1" > /dev/null 2>&1; do
+                sleep 5
+              done
+
+              echo "Loading legacy telemetry table (TBL_SC_FLEET_HIST_RAW)..."
+              python scripts/ingest_legacy_data.py
+
+              echo "Creating semantic view + read-only agent login..."
+              sqlcmd -S "$SQL_SERVER_HOST,$SQL_SERVER_PORT" -U "$SQL_ADMIN_USER" -P "$SQL_ADMIN_PASSWORD" -C -i scripts/setup_security_and_view.sql || \
+                echo "(non-fatal: login/schema likely already exists from a previous run)"
+
+              echo "Creating agent audit log table..."
+              sqlcmd -S "$SQL_SERVER_HOST,$SQL_SERVER_PORT" -U "$SQL_ADMIN_USER" -P "$SQL_ADMIN_PASSWORD" -C -i scripts/create_audit_log.sql
+
+              echo "DB init complete."
