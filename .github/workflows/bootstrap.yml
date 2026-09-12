@@ -38,6 +38,11 @@ jobs:
             --from-env-file="$APP_SECRETS_FILE" \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Create app-config ConfigMap
+        # db-init and sop-ingest below both need app-config via envFrom, so it
+        # has to exist before them, not just as part of the final app deploy.
+        run: kubectl apply -f k8s/app/configmap.yaml
+
       - name: Deploy SQL Server
         run: |
           kubectl apply -f k8s/mssql/
