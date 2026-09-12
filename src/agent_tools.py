@@ -47,7 +47,7 @@ if not PINECONE_API_KEY:
 
 if EMBEDDINGS_MODEL_SETTING == "OPENAI":
     print("🤖 Mode: Connecting to Cloud OpenAI Index (1536 Dim Space)...")
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     INDEX_NAME = "fde-sop-index-openai"
 else :
     local_model_target = os.getenv("Local_Embedding_Model", "BAAI/bge-m3").strip()

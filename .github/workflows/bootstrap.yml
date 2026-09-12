@@ -1,0 +1,65 @@
+name: Full Bootstrap (Rebuild Everything)
+
+# Recreates the entire stack from nothing: the app-secrets Secret, SQL Server,
+# the legacy-data + security-view + audit-log init, the Pinecone SOP index,
+# and the app itself. Use this after scripts/destroy_installation.sh, or to
+# stand the stack up on a brand-new minikube cluster.
+#
+# Requires the same self-hosted runner as "Enterprise Manual Deploy" (see
+# k8s/README.md), already running on the machine with minikube.
+#
+# k8s/app-secrets.env is gitignored and never checked out into the runner's
+# workspace, so this reads it from its one real location on the runner's
+# machine instead of a path relative to the checkout.
+on:
+  workflow_dispatch:
+
+env:
+  APP_SECRETS_FILE: /Volumes/D/Projects/FDE/FDELogistics/k8s/app-secrets.env
+
+jobs:
+  bootstrap:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Point kubectl at minikube
+        run: kubectl config use-context minikube
+
+      - name: Build image into minikube's Docker daemon
+        run: |
+          eval $(minikube docker-env)
+          docker build -t fde-cold-chain:local .
+
+      - name: Create app-secrets Secret
+        run: |
+          kubectl create secret generic app-secrets \
+            --from-env-file="$APP_SECRETS_FILE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy SQL Server
+        run: |
+          kubectl apply -f k8s/mssql/
+          kubectl wait --for=condition=ready pod -l app=mssql --timeout=180s
+
+      - name: Run db-init Job
+        run: |
+          kubectl delete job db-init --ignore-not-found
+          kubectl apply -f k8s/jobs/db-init-job.yaml
+          kubectl wait --for=condition=complete job/db-init --timeout=180s \
+            || { kubectl logs job/db-init --tail=80; exit 1; }
+
+      - name: Run sop-ingest Job
+        run: |
+          kubectl delete job sop-ingest --ignore-not-found
+          kubectl apply -f k8s/jobs/sop-ingest-job.yaml
+          kubectl wait --for=condition=complete job/sop-ingest --timeout=180s \
+            || { kubectl logs job/sop-ingest --tail=80; exit 1; }
+
+      - name: Deploy the app
+        run: |
+          kubectl apply -f k8s/app/
+          kubectl rollout restart deployment/fde-app
+          kubectl rollout status deployment/fde-app --timeout=180s \
+            || { kubectl logs -l app=fde-app --tail=80; exit 1; }

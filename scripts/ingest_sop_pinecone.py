@@ -48,7 +48,7 @@ EMBEDDINGS_MODEL_SETTING = os.getenv("Embeddings_model", "LOCAL").strip().upper(
 
 if EMBEDDINGS_MODEL_SETTING == "OPENAI":
     print("🤖 Mode: Utilizing Cloud OpenAI Embeddings (1536 Dim)...")
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     INDEX_NAME = "fde-sop-index-openai"  # Isolated OpenAI Index
     TARGET_DIMENSION = 1536
 else:

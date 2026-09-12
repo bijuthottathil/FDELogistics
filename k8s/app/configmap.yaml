@@ -9,5 +9,5 @@ data:
   # local Ollama server, which isn't bundled into this image/cluster.
   Agent_llm: "OPENAI"
   # LOCAL (HuggingFace, downloaded on first run) or OPENAI.
-  Embeddings_model: "LOCAL"
+  Embeddings_model: "OPENAI"
   Local_Embedding_Model: "BAAI/bge-m3"
