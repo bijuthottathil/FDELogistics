@@ -1,5 +1,8 @@
 # Cold-Chain Logistics FDE Assistant
 
+<img width="1532" height="1028" alt="image" src="https://github.com/user-attachments/assets/9c826a11-48d4-47b9-85eb-06435678f4bc" />
+
+
 An AI agent that lets logistics dispatchers **"chat with their data"** to investigate cold-chain incidents — reasoning across live fleet telemetry, real-time weather/corridor conditions, and enterprise SOP documents to produce a structured, cited action plan.
 
 Built as a Forward Deployed Engineering (FDE) style project: a legacy enterprise SQL database, a semantic security layer on top of it, a LangGraph tool-calling agent, and a Chainlit dispatch console.
@@ -115,5 +118,3 @@ After running a query, switch to **🛡️ Security & Audit Logs** in the sideba
 
 ## Reference material
 
-- [`Misc/Materials/FDE-YT-Project-Business-Presentation.pdf`](Misc/Materials/FDE-YT-Project-Business-Presentation.pdf) — business framing
-- [`Misc/Materials/Technical Design Document (TDD)_ Cold-Chain Logistics AI-Assistant.pdf`](Misc/Materials/Technical%20Design%20Document%20%28TDD%29_%20Cold-Chain%20Logistics%20AI-Assistant.pdf) — technical design
