@@ -116,5 +116,5 @@ Try these in the Dispatch Console (`chainlit run src/ui_chainlit.py -w`, or the 
 
 After running a query, switch to **🛡️ Security & Audit Logs** in the sidebar (admin credentials from `.env`/`k8s/app-secrets.env`) to see every tool call the agent made, logged to `FDE_VIEWS.AgentAuditLog`.
 
-## Reference material
+
 
